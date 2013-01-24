@@ -17,18 +17,20 @@ Spree::OrdersController.class_eval do
   end
 
   def populate_order_count_on_hand
+    # Check each normal variant
     params[:products].each do |product_id, variant_id|
-      product = Spree::Product.find product_id
-      if product.count_on_hand < params[:quantity].to_i
-        flash[:error] = "Unfortunately " + (product.count_on_hand == 0 ? "no" : "only" + product.count_on_hand.to_s ) + " units of the selected item remain."
+      variant = Spree::Variant.find variant_id
+      if variant.count_on_hand < params[:quantity].to_i
+        flash[:error] = "Unfortunately " + (variant.count_on_hand <= 0 ? "no" : "only " + variant.count_on_hand.to_s ) + " units of the selected item remain."
         redirect_populate_to_first_product
       end
     end if params[:products]
 
+    # Check master variant
     params[:variants].each do |variant_id, quantity|
       variant = Spree::Variant.find variant_id
-      if variant.count_on_hand < params[:quantity].to_i
-        flash[:error] = "Unfortunately " + (variant.count_on_hand == 0 ? "no" : "only" + variant.count_on_hand.to_s ) + " units of the selected item remain."
+      if variant.count_on_hand < quantity.to_i
+        flash[:error] = "Unfortunately " + (variant.count_on_hand <= 0 ? "no" : "only " + variant.count_on_hand.to_s ) + " units of the selected item remain."
         redirect_populate_to_first_product
       end
     end if params[:variants]
